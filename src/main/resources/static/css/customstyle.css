@@ -1,0 +1,23 @@
+#textareaCode,#textareaResult,#controlPanel, #PC, #instruction{
+    font-family: Consolas;
+    font-size: 14px;
+}
+#memoryArea, #programArea,#machineCodeArea,#descriptionArea,#terminalArea{
+    font-family: Consolas;
+    font-size: 12px;
+}
+.breadcrumb li.active{
+    font-weight: bold;
+}
+
+.breadcrumb li a{
+    text-decoration: none;
+}
+
+.breadcrumb li a:link,a:visited,a:hover,a:active{color:#000000}
+
+#commonTbl tr, #coprocessorTbl tr {
+    font-family: Consolas;
+    font-size: 14px;
+}
+

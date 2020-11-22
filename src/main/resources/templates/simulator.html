@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" th:href="@{css/bootstrap.min.css}" type="text/css">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{css/customstyle.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{css/github.css}" type="text/css">
+    <title>计算机系统原理大程 - 模拟器</title>
+</head>
+<body>
+    <!-- Main Body-->
+    <nav class="navbar navbar-default" role="navigation" style="background: #96b97d;">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="javascript:;" style="color: #FFF;font-weight: bold">MIPS汇编器大程 by 顺利毕业万岁组</a>
+            </div>
+            <div class="navbar-header" style="float: right;">
+                <a class="navbar-brand" th:href="@{simulator}" style="color: #FFF;font-weight: bold">模拟器</a>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <form class="form-inline">
+                            <div class="row">
+                                <label>&emsp;ROM文件&emsp;</label>
+                                <input type="text" name="ROMFileName" id="ROMFileName" placeholder="MipsOS.bin" readonly="readonly">
+                                <input type="file" name="file" id="ROMFile" accept=".bin" style="display: none;">&emsp;
+                                <button id="openROMFileBtn" type="button" class="btn btn-default">
+                                    <span class="glyphicon glyphicon-file"></span>载入ROM文件
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="panel-body">
+                        <textarea class="form-control" rows="20" id="desktop" name="desktop" readonly="readonly"></textarea>
+                        <input class="form-control" type="text" id="statusBar" name="statusBar" readonly="readonly">
+                        <div class="col-md-12">
+                            <p class="text-danger" id="tip" style="display: none;"></p>
+                        </div>
+                        <hr/>
+                        <ul id="crumbNav" class="breadcrumb">
+                            <li id="memoryListItem" class="active"><a href="#memory" style="text-decoration: none">存储器</a></li>
+                            <li id="programListItem"><a href="#program" style="text-decoration: none">程序数据段</a></li>
+                            <li id="descriptionListItem"><a href="#description" style="text-decoration: none">程序说明</a></li>
+                            <li id="hexListItem"><a href="#machineCode" style="text-decoration: none">十六进制机器码输入</a></li>
+                            <li id="terminalItem"><a href="#terminal" style="text-decoration: none">终端</a></li>
+                        </ul>
+                        <div class="col-md-12" id="memory">
+                            <textarea id="memoryArea" class="form-control" rows="20" readonly="readonly">memory</textarea>
+                        </div>
+                        <div class="col-md-12" id="program" style="display: none;">
+                            <textarea id="programArea" class="form-control" rows="20" readonly="readonly">program</textarea>
+                        </div>
+                        <div class="col-md-12" id="description" style="display: none;">
+                            <textarea id="descriptionArea" class="form-control" rows="20" readonly="readonly">
+程序以 zjie 寻址，每条指令 2zjie。支持MIPS编译器
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+总内存：		0xA000zjie;	#40960 包含程序段、数据段、显存、堆栈
+* 程序段：0x0000-0x3FFF
+* 数据段：0x4000-0x6FFF
+* 显存：0x7000-0x8FFF
+* 堆栈：0x9000-0x9FFF
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+磁盘文件说明：
+* 文件数量：3
+* 文件信息：
+ENGLISH.TXT, created at: 2020-6-25 10:12:24, latest modified at: 2020-6-25 10:12:40, size: 2044 B
+CHINESE.TXT, created at: 2020-6-25 10:13:30, latest modified at: 2020-6-25 10:13:44, size: 5898 B
+HELLO, created at: 2020-6-25 15:39:20, latest modified at: 2020-6-25 15:39:22, size: 0 B
+* 文件可通过相关系统调用访问，具体信息可见相关文档《MIPS模拟器设计报告.pdf》
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+机器码输入说明：
+十六进制指令，每条占一行，无0x前缀
+                            </textarea>
+                        </div>
+                        <div class="col-md-12" id="machineCode" style="display: none;">
+                            <textarea id="machineCodeArea" class="form-control" rows="20"></textarea>
+                        </div>
+                        <div class="col-md-12" id="terminal" style="display: none;">
+                            <textarea id="terminalArea" class="form-control" rows="20" readonly="readonly"></textarea>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <form class="form-inline">
+                            <div class="row">
+                                <label>&emsp;通用寄存器&emsp;</label>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="panel-body">
+                        <table class="table-bordered table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="col-md-3">0</th>
+                                    <th class="col-md-3">1</th>
+                                    <th class="col-md-3">2</th>
+                                    <th class="col-md-3">3</th>
+                                </tr>
+                            </thead>
+                            <tbody id="commonTbl">
+                                <tr>
+                                    <td id="reg0"></td>
+                                    <td id="reg8"></td>
+                                    <td id="reg16"></td>
+                                    <td id="reg24"></td>
+                                </tr>
+                                <tr>
+                                    <td id="reg1"></td>
+                                    <td id="reg9"></td>
+                                    <td id="reg17"></td>
+                                    <td id="reg25"></td>
+                                </tr>
+                                <tr>
+                                    <td id="reg2"></td>
+                                    <td id="reg10"></td>
+                                    <td id="reg18"></td>
+                                    <td id="reg26"></td>
+                                </tr>
+                                <tr>
+                                    <td id="reg3"></td>
+                                    <td id="reg11"></td>
+                                    <td id="reg19"></td>
+                                    <td id="reg27"></td>
+                                </tr>
+                                <tr>
+                                    <td id="reg4"></td>
+                                    <td id="reg12"></td>
+                                    <td id="reg20"></td>
+                                    <td id="reg28"></td>
+                                </tr>
+                                <tr>
+                                    <td id="reg5"></td>
+                                    <td id="reg13"></td>
+                                    <td id="reg21"></td>
+                                    <td id="reg29"></td>
+                                </tr>
+                                <tr>
+                                    <td id="reg6"></td>
+                                    <td id="reg14"></td>
+                                    <td id="reg22"></td>
+                                    <td id="reg30"></td>
+                                </tr>
+                                <tr>
+                                    <td id="reg7"></td>
+                                    <td id="reg15"></td>
+                                    <td id="reg23"></td>
+                                    <td id="reg31"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <form class="form-inline">
+                            <div class="row">
+                                <label>&emsp;其他寄存器&emsp;</label>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="panel-body">
+                        <table class="table-bordered table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="col-md-2">STATUS</th>
+                                    <th class="col-md-2">CAUSE</th>
+                                    <th class="col-md-2">EPC</th>
+                                    <th class="col-md-2">Hi</th>
+                                    <th class="col-md-2">Lo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="coprocessorTbl">
+                                <tr>
+                                    <td id="status"></td>
+                                    <td id="cause"></td>
+                                    <td id="epc"></td>
+                                    <td id="hi"></td>
+                                    <td id="lo"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <form class="form-inline">
+                            <div class="row">
+                                <label>&emsp;模拟器操作&emsp;</label>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="panel-body">
+                        <form id="actionForm">
+                            <div class="col-md-12">
+                                <label>PC&emsp;&emsp;</label>
+                                <input type="text" id="PC" readonly="readonly">
+                            </div>
+                            <div class="col-md-12">
+                                <label>指令&emsp;&nbsp;</label>
+                                <input type="text" id="instruction" readonly="readonly">
+                            </div>
+                            <div class="col-md-12">
+                                <hr/>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="button" class="btn btn-primary btn-block" id="debugBtn">调试</button>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="button" class="btn btn-primary btn-block" id="executeBtn">执行</button>
+                            </div>
+                            <div id="debugDiv" class="col-md-12" style="display: none">
+                                <div class="col-md-12">
+                                    <hr/>
+                                </div>
+                                <div class="col-md-6">
+                                    <button type="button" class="btn btn-warning btn-block" id="nextBtn">下一步</button>
+                                </div>
+                                <div class="col-md-6">
+                                    <button type="button" class="btn btn-warning btn-block" id="stopBtn">结束调试</button>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <hr/>
+                                <button type="button" id="reboot" class="btn btn-block btn-danger" style="float: right;">重启</button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <form class="form-inline">
+                            <div class="row">
+                                <label>&emsp;控制面板&emsp;</label>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="panel-body">
+                        <div class="col-md-12">
+                            <textarea id="controlPanel" name="controlName" class="form-control" rows="10" readonly="readonly"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+        <footer>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div style="text-align: center;">
+                        <p>Copyright © 2020<a href="javascript:;" style="text-decoration: none">&nbsp;ZJU-计算机系统原理小组-顺利毕业万岁</a></p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+    <!-- !Main Body-->
+
+    <!-- jQuery -->
+    <script th:src="@{js/jquery-3.3.1.min.js}" type="text/javascript"></script>
+    <!-- Bootstrap Core JS -->
+    <script th:src="@{js/popper.min.js}" type="text/javascript"></script>
+    <script  th:src="@{js/bootstrap.min.js}" type="text/javascript"></script>
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!-- custom JS -->
+    <script th:src="@{js/simulator.js}" type="text/javascript"></script>
+</body>
+</html>
